@@ -34,7 +34,7 @@ func (s *Server) Run(ctx context.Context) error {
 	// Start two web services in separate goroutines
 	g.Go(func() error { return httpServer(gctx, s.httpAddr) })
 	g.Go(func() error { return httpsServer(gctx, s.httpsAddr) })
-	
+
 	// Listen for OS interrupts and cancel context
 	go func() {
 		<-signalChan // Block until an OS signal is received
@@ -70,7 +70,7 @@ func httpServer(ctx context.Context, addr string) error {
 	defer close(errChan)
 
 	go func() {
-		fmt.Println("Starting server on", addr)
+		fmt.Println("Starting HTTP server on", addr)
 		// Return ListenAndServe error directly so errgroup can handle it
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			errChan <- err
@@ -118,7 +118,7 @@ func httpsServer(ctx context.Context, addr string) error {
 	defer close(errChan)
 
 	go func() {
-		fmt.Println("Starting server on", addr)
+		fmt.Println("Starting HTTPS server on", addr)
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			//return fmt.Errorf("error starting HTTP server:%w", err)
 			errChan <- err
@@ -127,7 +127,7 @@ func httpsServer(ctx context.Context, addr string) error {
 
 	select {
 	case <-ctx.Done():
-		fmt.Println("Shutting down HTTP server on", addr)
+		fmt.Println("Shutting down HTTPS server on", addr)
 		httpServer.SetKeepAlivesEnabled(false)
 		return httpServer.Shutdown(ctx) // Gracefully shutdown server
 	case err := <-errChan:
